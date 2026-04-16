@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SBTI 人格图鉴</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    :root{--bg:#070b16;--panel:#10172b;--line:rgba(255,255,255,.13);--text:#ecf1ff;--muted:#9fadc9;--brand:#7f9bff;--brand2:#39d6aa;--warn:#f4a259;}
+    *{box-sizing:border-box} body{margin:0;color:var(--text);font-family:Inter,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+      background:radial-gradient(1000px 600px at 80% -20%,rgba(127,155,255,.28),transparent),radial-gradient(800px 500px at -10% 10%,rgba(57,214,170,.18),transparent),var(--bg)}
+    .wrap{max-width:1280px;margin:0 auto;padding:24px 16px 42px}
+    .hero{padding:24px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(130deg,rgba(127,155,255,.2),rgba(57,214,170,.08));}
+    h1{margin:0 0 6px;font-size:34px} .muted{color:var(--muted)}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+    .k{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px} .k .l{font-size:12px;color:var(--muted)} .k .v{font-weight:700;font-size:21px;margin-top:4px}
+    .sec{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px}
+    .sec h2{margin:0 0 10px}
+    .chart{height:420px}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+    input,select{background:#0a1020;border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:10px}
+    input{min-width:260px}
+    .small{font-size:13px;color:var(--muted)}
+    .map-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .info-card{border:1px solid var(--line);border-radius:10px;padding:10px;background:#0c1325}
+    .dict{width:100%;border-collapse:collapse;font-size:13px}
+    .dict th,.dict td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+    .dict th{color:#b9c7e6;font-weight:600}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+    .card{background:#0c1325;border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:.2s transform,.2s box-shadow}
+    .card:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(0,0,0,.35)}
+    .avatar{height:180px;background:linear-gradient(135deg,#1a2546,#131b35);display:flex;align-items:center;justify-content:center}
+    .avatar img{max-width:100%;max-height:100%;object-fit:contain}
+    .fallback{font-size:42px;opacity:.5}
+    .body2{padding:10px 12px}
+    .t{font-weight:700;font-size:16px} .s{font-size:13px;color:var(--muted);margin-top:3px}
+    .tag{display:inline-block;margin-top:8px;padding:3px 8px;border-radius:999px;background:rgba(127,155,255,.18);border:1px solid rgba(127,155,255,.4);font-size:12px}
+    .sim-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .sim-item{border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center;background:#0b1223}
+    .sim-item b{display:block;font-size:12px;color:#b9c7e6}
+    .sim-item button{margin-top:4px}
+    .btn{background:#1b2a56;border:1px solid #3a4d8f;color:#e7eeff;border-radius:8px;padding:4px 8px;cursor:pointer}
+    .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;color:#cfe0ff;background:#0c1325}
+    @media(max-width:980px){.kpis{grid-template-columns:repeat(2,1fr)} .map-grid{grid-template-columns:1fr} .info-grid{grid-template-columns:1fr} .sim-grid{grid-template-columns:repeat(3,1fr)} h1{font-size:28px}}
+    @media(max-width:560px){.kpis{grid-template-columns:1fr} .chart{height:340px} .sim-grid{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <h1>SBTI 算法映射可视化</h1>
+    <div class="muted">从作答到人格命中的完整解释路径（用于理解算法，不作为心理诊断）。</div>
+  </section>
+
+  <section class="kpis">
+    <div class="k"><div class="l">人格类型数</div><div class="v">25</div></div>
+    <div class="k"><div class="l">理论作答组合</div><div class="v">1029455660473245</div></div>
+    <div class="k"><div class="l">形象卡片数量</div><div class="v">27</div></div>
+    <div class="k"><div class="l">生成时间</div><div class="v" style="font-size:16px">2026-04-16 20:08</div></div>
+  </section>
+
+  <section class="sec">
+    <h2>为什么不同人格比例不一样？</h2>
+    <div class="info-grid">
+      <div class="info-card"><b>① 组合空间</b><div class="small">默认假设所有理论作答组合等概率进入映射。</div></div>
+      <div class="info-card"><b>② 15维分档 + 距离匹配</b><div class="small">每个组合会映射成15维向量，再与人格模板比距离。</div></div>
+      <div class="info-card"><b>③ 承接组合数不同</b><div class="small">某些人格覆盖的组合更多，因此最终比例更高。</div></div>
+    </div>
+    <div id="flow" class="chart" style="height:340px;margin-top:8px"></div>
+    <div id="c1" class="chart"></div>
+  </section>
+
+  <section class="sec">
+    <h2>15维词典（每维都可解释）</h2>
+    <table class="dict" id="dimTable"></table>
+  </section>
+
+  <section class="sec">
+    <h2>算法映射可视化（P0）</h2>
+    <div class="toolbar">
+      <select id="uType"></select>
+      <span class="small">vs</span>
+      <select id="tType"></select>
+      <span id="calc" class="small"></span>
+      <span id="judge" class="pill"></span>
+    </div>
+    <div class="map-grid">
+      <div id="radar" class="chart" style="height:360px"></div>
+      <div id="diff" class="chart" style="height:360px"></div>
+    </div>
+    <div id="verdict" class="small" style="margin-top:6px"></div>
+  </section>
+
+  <section class="sec">
+    <h2>边界解释（P1：Top1 vs Top2）</h2>
+    <div id="boundary" class="small"></div>
+    <div id="bchart" class="chart" style="height:300px"></div>
+  </section>
+
+  <section class="sec">
+    <h2>敏感度模拟（P2：What-if）</h2>
+    <div class="small">点击某维的 + / - 调整 1 档，观察命中人格是否变化。</div>
+    <div id="simGrid" class="sim-grid" style="margin-top:10px"></div>
+    <div id="simResult" class="small" style="margin-top:8px"></div>
+  </section>
+
+  <section class="sec">
+    <h2>全部人格</h2>
+    <div class="toolbar">
+      <input id="q" placeholder="搜索人格：输入缩写或中文名，如 CTRL / 拿捏者" />
+      <select id="sort">
+        <option value="desc">按占比从高到低</option>
+        <option value="asc">按占比从低到高</option>
+      </select>
+    </div>
+    <div id="cards" class="cards"></div>
+  </section>
+</div>
+
+<script>
+const fullData = [{"type": "DRUNK", "cn": "", "label": "DRUNK", "percentage": 20.0}, {"type": "OJBK", "cn": "无所谓人", "label": "OJBK（无所谓人）", "percentage": 7.922097481013711}, {"type": "THAN-K", "cn": "感恩者", "label": "THAN-K（感恩者）", "percentage": 6.351402235724296}, {"type": "FAKE", "cn": "伪人", "label": "FAKE（伪人）", "percentage": 5.373833700364774}, {"type": "SEXY", "cn": "尤物", "label": "SEXY（尤物）", "percentage": 4.741384134694022}, {"type": "MALO", "cn": "吗喽", "label": "MALO（吗喽）", "percentage": 4.673337139895046}, {"type": "Dior-s", "cn": "屌丝", "label": "Dior-s（屌丝）", "percentage": 4.194482548392013}, {"type": "MUM", "cn": "妈妈", "label": "MUM（妈妈）", "percentage": 4.179507191732443}, {"type": "ZZZZ", "cn": "装死者", "label": "ZZZZ（装死者）", "percentage": 3.7468888745323943}, {"type": "LOVE-R", "cn": "多情者", "label": "LOVE-R（多情者）", "percentage": 3.373491792789513}, {"type": "IMSB", "cn": "傻者", "label": "IMSB（傻者）", "percentage": 3.3599492978803194}, {"type": "CTRL", "cn": "拿捏者", "label": "CTRL（拿捏者）", "percentage": 2.9769124575133143}, {"type": "SOLO", "cn": "孤儿", "label": "SOLO（孤儿）", "percentage": 2.9315292098554964}, {"type": "FUCK", "cn": "草者", "label": "FUCK（草者）", "percentage": 2.738499873195917}, {"type": "GOGO", "cn": "行者", "label": "GOGO（行者）", "percentage": 2.4723945872671695}, {"type": "JOKE-R", "cn": "小丑", "label": "JOKE-R（小丑）", "percentage": 2.426866380833049}, {"type": "OH-NO", "cn": "哦不人", "label": "OH-NO（哦不人）", "percentage": 2.408451040905067}, {"type": "MONK", "cn": "僧人", "label": "MONK（僧人）", "percentage": 2.331310670561876}, {"type": "SHIT", "cn": "愤世者", "label": "SHIT（愤世者）", "percentage": 2.0514008488590805}, {"type": "DEAD", "cn": "死者", "label": "DEAD（死者）", "percentage": 1.9578243834181936}, {"type": "ATM-er", "cn": "送钱者", "label": "ATM-er（送钱者）", "percentage": 1.9480898440557184}, {"type": "THIN-K", "cn": "思考者", "label": "THIN-K（思考者）", "percentage": 1.841639924211649}, {"type": "WOC!", "cn": "握草人", "label": "WOC!（握草人）", "percentage": 1.668547994631229}, {"type": "IMFW", "cn": "废物", "label": "IMFW（废物）", "percentage": 1.6459176995153708}, {"type": "POOR", "cn": "贫困者", "label": "POOR（贫困者）", "percentage": 1.3769243887356717}, {"type": "BOSS", "cn": "领导者", "label": "BOSS（领导者）", "percentage": 1.268718237563321}, {"type": "HHHH", "cn": "", "label": "HHHH", "percentage": 0.0385980618593458}];
+const cardsData = [{"code": "DRUNK", "cn": "", "share": 20.0, "image": "https://sbti.unun.dev/image/DRUNK.png"}, {"code": "OJBK", "cn": "无所谓人", "share": 7.9221, "image": "https://sbti.unun.dev/image/OJBK.png"}, {"code": "THAN-K", "cn": "感恩者", "share": 6.3514, "image": "https://sbti.unun.dev/image/THAN-K.png"}, {"code": "FAKE", "cn": "伪人", "share": 5.3738, "image": "https://sbti.unun.dev/image/FAKE.png"}, {"code": "SEXY", "cn": "尤物", "share": 4.7414, "image": "https://sbti.unun.dev/image/SEXY.png"}, {"code": "MALO", "cn": "吗喽", "share": 4.6733, "image": "https://sbti.unun.dev/image/MALO.png"}, {"code": "Dior-s", "cn": "屌丝", "share": 4.1945, "image": "https://sbti.unun.dev/image/Dior-s.jpg"}, {"code": "MUM", "cn": "妈妈", "share": 4.1795, "image": "https://sbti.unun.dev/image/MUM.png"}, {"code": "ZZZZ", "cn": "装死者", "share": 3.7469, "image": "https://sbti.unun.dev/image/ZZZZ.png"}, {"code": "LOVE-R", "cn": "多情者", "share": 3.3735, "image": "https://sbti.unun.dev/image/LOVE-R.png"}, {"code": "IMSB", "cn": "傻者", "share": 3.3599, "image": "https://sbti.unun.dev/image/IMSB.png"}, {"code": "CTRL", "cn": "拿捏者", "share": 2.9769, "image": "https://sbti.unun.dev/image/CTRL.png"}, {"code": "SOLO", "cn": "孤儿", "share": 2.9315, "image": "https://sbti.unun.dev/image/SOLO.png"}, {"code": "FUCK", "cn": "草者", "share": 2.7385, "image": "https://sbti.unun.dev/image/FUCK.png"}, {"code": "GOGO", "cn": "行者", "share": 2.4724, "image": "https://sbti.unun.dev/image/GOGO.png"}, {"code": "JOKE-R", "cn": "小丑", "share": 2.4269, "image": "https://sbti.unun.dev/image/JOKE-R.jpg"}, {"code": "OH-NO", "cn": "哦不人", "share": 2.4085, "image": "https://sbti.unun.dev/image/OH-NO.png"}, {"code": "MONK", "cn": "僧人", "share": 2.3313, "image": "https://sbti.unun.dev/image/MONK.png"}, {"code": "SHIT", "cn": "愤世者", "share": 2.0514, "image": "https://sbti.unun.dev/image/SHIT.png"}, {"code": "DEAD", "cn": "死者", "share": 1.9578, "image": "https://sbti.unun.dev/image/DEAD.png"}, {"code": "ATM-er", "cn": "送钱者", "share": 1.9481, "image": "https://sbti.unun.dev/image/ATM-er.png"}, {"code": "THIN-K", "cn": "思考者", "share": 1.8416, "image": "https://sbti.unun.dev/image/THIN-K.png"}, {"code": "WOC!", "cn": "握草人", "share": 1.6685, "image": "https://sbti.unun.dev/image/WOC.png"}, {"code": "IMFW", "cn": "废物", "share": 1.6459, "image": "https://sbti.unun.dev/image/IMFW.png"}, {"code": "POOR", "cn": "贫困者", "share": 1.3769, "image": "https://sbti.unun.dev/image/POOR.png"}, {"code": "BOSS", "cn": "领导者", "share": 1.2687, "image": "https://sbti.unun.dev/image/BOSS.png"}, {"code": "HHHH", "cn": "", "share": 0.0386, "image": "https://sbti.unun.dev/image/HHHH.png"}];
+const patternData = [{"code": "CTRL", "cn": "拿捏者", "pattern": "HHH-HMH-MHH-HHH-MHM", "vec": [3, 3, 3, 3, 2, 3, 2, 3, 3, 3, 3, 3, 2, 3, 2]}, {"code": "ATM-er", "cn": "送钱者", "pattern": "HHH-HHM-HHH-HMH-MHL", "vec": [3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 2, 3, 2, 3, 1]}, {"code": "Dior-s", "cn": "屌丝", "pattern": "MHM-MMH-MHM-HMH-LHL", "vec": [2, 3, 2, 2, 2, 3, 2, 3, 2, 3, 2, 3, 1, 3, 1]}, {"code": "BOSS", "cn": "领导者", "pattern": "HHH-HMH-MMH-HHH-LHL", "vec": [3, 3, 3, 3, 2, 3, 2, 2, 3, 3, 3, 3, 1, 3, 1]}, {"code": "THAN-K", "cn": "感恩者", "pattern": "MHM-HMM-HHM-MMH-MHL", "vec": [2, 3, 2, 3, 2, 2, 3, 3, 2, 2, 2, 3, 2, 3, 1]}, {"code": "OH-NO", "cn": "哦不人", "pattern": "HHL-LMH-LHH-HHM-LHL", "vec": [3, 3, 1, 1, 2, 3, 1, 3, 3, 3, 3, 2, 1, 3, 1]}, {"code": "GOGO", "cn": "行者", "pattern": "HHM-HMH-MMH-HHH-MHM", "vec": [3, 3, 2, 3, 2, 3, 2, 2, 3, 3, 3, 3, 2, 3, 2]}, {"code": "SEXY", "cn": "尤物", "pattern": "HMH-HHL-HMM-HMM-HLH", "vec": [3, 2, 3, 3, 3, 1, 3, 2, 2, 3, 2, 2, 3, 1, 3]}, {"code": "LOVE-R", "cn": "多情者", "pattern": "MLH-LHL-HLH-MLM-MLH", "vec": [2, 1, 3, 1, 3, 1, 3, 1, 3, 2, 1, 2, 2, 1, 3]}, {"code": "MUM", "cn": "妈妈", "pattern": "MMH-MHL-HMM-LMM-HLL", "vec": [2, 2, 3, 2, 3, 1, 3, 2, 2, 1, 2, 2, 3, 1, 1]}, {"code": "FAKE", "cn": "伪人", "pattern": "HLM-MML-MLM-MLM-HLH", "vec": [3, 1, 2, 2, 2, 1, 2, 1, 2, 2, 1, 2, 3, 1, 3]}, {"code": "OJBK", "cn": "无所谓人", "pattern": "MMH-MMM-HML-LMM-MML", "vec": [2, 2, 3, 2, 2, 2, 3, 2, 1, 1, 2, 2, 2, 2, 1]}, {"code": "MALO", "cn": "吗喽", "pattern": "MLH-MHM-MLH-MLH-LMH", "vec": [2, 1, 3, 2, 3, 2, 2, 1, 3, 2, 1, 3, 1, 2, 3]}, {"code": "JOKE-R", "cn": "小丑", "pattern": "LLH-LHL-LML-LLL-MLM", "vec": [1, 1, 3, 1, 3, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2]}, {"code": "WOC!", "cn": "握草人", "pattern": "HHL-HMH-MMH-HHM-LHH", "vec": [3, 3, 1, 3, 2, 3, 2, 2, 3, 3, 3, 2, 1, 3, 3]}, {"code": "THIN-K", "cn": "思考者", "pattern": "HHL-HMH-MLH-MHM-LHH", "vec": [3, 3, 1, 3, 2, 3, 2, 1, 3, 2, 3, 2, 1, 3, 3]}, {"code": "SHIT", "cn": "愤世者", "pattern": "HHL-HLH-LMM-HHM-LHH", "vec": [3, 3, 1, 3, 1, 3, 1, 2, 2, 3, 3, 2, 1, 3, 3]}, {"code": "ZZZZ", "cn": "装死者", "pattern": "MHL-MLH-LML-MML-LHM", "vec": [2, 3, 1, 2, 1, 3, 1, 2, 1, 2, 2, 1, 1, 3, 2]}, {"code": "POOR", "cn": "贫困者", "pattern": "HHL-MLH-LMH-HHH-LHL", "vec": [3, 3, 1, 2, 1, 3, 1, 2, 3, 3, 3, 3, 1, 3, 1]}, {"code": "MONK", "cn": "僧人", "pattern": "HHL-LLH-LLM-MML-LHM", "vec": [3, 3, 1, 1, 1, 3, 1, 1, 2, 2, 2, 1, 1, 3, 2]}, {"code": "IMSB", "cn": "傻者", "pattern": "LLM-LMM-LLL-LLL-MLM", "vec": [1, 1, 2, 1, 2, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2]}, {"code": "SOLO", "cn": "孤儿", "pattern": "LML-LLH-LHL-LML-LHM", "vec": [1, 2, 1, 1, 1, 3, 1, 3, 1, 1, 2, 1, 1, 3, 2]}, {"code": "FUCK", "cn": "草者", "pattern": "MLL-LHL-LLM-MLL-HLH", "vec": [2, 1, 1, 1, 3, 1, 1, 1, 2, 2, 1, 1, 3, 1, 3]}, {"code": "DEAD", "cn": "死者", "pattern": "LLL-LLM-LML-LLL-LHM", "vec": [1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 3, 2]}, {"code": "IMFW", "cn": "废物", "pattern": "LLH-LHL-LML-LLL-MLL", "vec": [1, 1, 3, 1, 3, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1]}];
+const dimDefs = [{"id": "S1", "name": "S1 自尊自信", "desc": "与自我价值感和自我评价有关", "q": "q1: 我不仅是屌丝，我还是joker,我还是咸鱼，这辈子没谈过一场恋爱，胆怯又自卑，我的青春就是一场又一场的意淫，每一天幻想着我也能有一个女孩子和我一起压马路，一起逛街，一起玩，现实却是爆了父母金币，读了个烂学校，混日子之后找班上，没有理想，没有目标，没有能力的三无人员，每次看到你能在网上开屌丝的玩笑，我都想哭，我就是地底下的老鼠，透过下水井的缝隙，窥探地上的各种美好，每一次看到这种都是对我心灵的一次伤害，对我生存空间的一次压缩，求求哥们给我们这种小丑一点活路吧，我真的不想在白天把枕巾哭湿一大片<br/>q2: 我不够好，周围的人都比我优秀"}, {"id": "S2", "name": "S2 自我清晰度", "desc": "与自我认知清晰程度有关", "q": "q3: 我很清楚真正的自己是什么样的<br/>q4: 我内心有真正追求的东西"}, {"id": "S3", "name": "S3 核心价值", "desc": "与长期价值观和人生方向有关", "q": "q5: 我一定要不断往上爬、变得更厉害<br/>q6: 外人的评价对我来说无所吊谓。"}, {"id": "E1", "name": "E1 依恋安全感", "desc": "与关系中的安全感和信任有关", "q": "q7: 对象超过5小时没回消息，说自己窜稀了，你会怎么想？<br/>q8: 我在感情里经常担心被对方抛弃"}, {"id": "E2", "name": "E2 情感投入度", "desc": "与情感表达和投入强度有关", "q": "q9: 我对天发誓，我对待每一份感情都是认真的！<br/>q10: 你的恋爱对象是一个尊老爱幼，温柔敦厚，洁身自好，光明磊落，大义凛然，能言善辩，口才流利，观察入微，见多识广，博学多才，诲人不倦，和蔼可亲，平易近人，心地善良，慈眉善目，积极进取，意气风发，玉树临风，国色天香，倾国倾城，花容月貌的人，此时你会？"}, {"id": "E3", "name": "E3 边界与依赖", "desc": "与关系边界和依赖模式有关", "q": "q11: 恋爱后，对象非常黏人，你作何感想？<br/>q12: 我在任何关系里都很重视个人空间"}, {"id": "A1", "name": "A1 世界观倾向", "desc": "与对世界与他人的基本判断有关", "q": "q13: 大多数人是善良的<br/>q14: 你走在街上，一位萌萌的小女孩蹦蹦跳跳地朝你走来（正脸、侧脸看都萌，用vivo、苹果、华为、OPPO手机看都萌，实在是非常萌的那种），她递给你一根棒棒糖，此时你作何感想？"}, {"id": "A2", "name": "A2 规则与灵活度", "desc": "与规则偏好和灵活调整有关", "q": "q15: 快考试了，学校规定必须上晚自习，请假会扣分，但今晚你约了女/男神一起玩《绝地求生：刺激战场》（一款刺激的游戏），你怎么办？<br/>q16: 我喜欢打破常规，不喜欢被束缚"}, {"id": "A3", "name": "A3 人生意义感", "desc": "与意义感、目标感和动力有关", "q": "q17: 我做事通常有目标。<br/>q18: 突然某一天，我意识到人生哪有什么他妈的狗屁意义，人不过是和动物一样被各种欲望支配着，纯纯是被激素控制的东西，饿了就吃，困了就睡，一发情就想交配，我们简直和猪狗一样没什么区别。"}, {"id": "Ac1", "name": "Ac1 行动控制", "desc": "与冲动控制和行动稳定性有关", "q": "q19: 我做事主要为了取得成果和进步，而不是避免麻烦和风险。<br/>q20: 你因便秘坐在马桶上（已长达30分钟），拉不出很难受。此时你更像"}, {"id": "Ac2", "name": "Ac2 执行耐力", "desc": "与持续执行和抗干扰能力有关", "q": "q21: 我做决定比较果断，不喜欢犹豫<br/>q22: 此题没有题目，请盲选"}, {"id": "Ac3", "name": "Ac3 延迟满足", "desc": "与长期收益偏好和自律有关", "q": "q23: 别人说你“执行力强”，你内心更接近哪句？<br/>q24: 我做事常常有计划，____"}, {"id": "So1", "name": "So1 社会比较", "desc": "与社会参照和比较敏感度有关", "q": "q25: 你因玩《第五人格》（一款刺激的游戏）而结识许多网友，并被邀请线下见面，你的想法是？<br/>q26: 朋友带了ta的朋友一起来玩，你最可能的状态是"}, {"id": "So2", "name": "So2 身份表达", "desc": "与外显身份和标签表达有关", "q": "q27: 我和人相处主打一个电子围栏，靠太近会自动报警。<br/>q28: 我渴望和我信任的人关系密切，熟得像失散多年的亲戚。"}, {"id": "So3", "name": "So3 群体关系", "desc": "与群体协作、归属与规范互动有关", "q": "q29: 有时候你明明对一件事有不同的、负面的看法，但最后没说出来。多数情况下原因是：<br/>q30: 我在不同人面前会表现出不一样的自己"}];
+const totalCombos = 1029455660473245;
+const dimOrder = ['S1','S2','S3','E1','E2','E3','A1','A2','A3','Ac1','Ac2','Ac3','So1','So2','So3'];
+
+function __start(){
+if(typeof window.echarts==='undefined'){ setTimeout(__start,120); return; }
+
+function bar(id,data,key,title,color){
+ const c=echarts.init(document.getElementById(id));
+ c.setOption({
+  title:{text:title,left:'center',textStyle:{color:'#dce6ff',fontSize:14}},
+  tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+  grid:{left:40,right:12,top:46,bottom:120},
+  xAxis:{type:'category',data:data.map(x=>x.label),axisLabel:{color:'#a7b5d6',rotate:45,interval:0,fontSize:11},axisLine:{lineStyle:{color:'rgba(255,255,255,.2)'}}},
+  yAxis:{type:'value',name:'%',nameTextStyle:{color:'#a7b5d6'},axisLabel:{color:'#a7b5d6'},splitLine:{lineStyle:{color:'rgba(255,255,255,.12)'}}},
+  series:[{type:'bar',data:data.map(x=>Number(x[key]).toFixed(4)),itemStyle:{color,borderRadius:[5,5,0,0]}}]
+ });
+ window.addEventListener('resize',()=>c.resize());
+}
+bar('c1', fullData, 'percentage', '人格占比分布（含隐藏分支）', '#7f9bff');
+
+// flow chart (P0)
+const flow = echarts.init(document.getElementById('flow'));
+const top = [...fullData].sort((a,b)=>b.percentage-a.percentage);
+const topNodes = top.slice(0,8);
+const otherPct = top.slice(8).reduce((s,x)=>s+x.percentage,0);
+const links = [{source:'总组合空间', target:'进入15维映射', value:100}];
+const nodes = [{name:'总组合空间'},{name:'进入15维映射'}];
+for (const x of topNodes){ nodes.push({name:x.type}); links.push({source:'进入15维映射', target:x.type, value:+x.percentage.toFixed(4)}); }
+nodes.push({name:'其他人格'}); links.push({source:'进入15维映射', target:'其他人格', value:+otherPct.toFixed(4)});
+flow.setOption({
+  title:{text:'组合流向示意（比例%）',left:'center',textStyle:{color:'#dce6ff',fontSize:14}},
+  tooltip:{trigger:'item',formatter:(p)=>{
+    if(typeof p.value==='number'){
+      const n = Math.round(totalCombos * p.value / 100);
+      return `${p.data?.source||''}${p.data?.source?' → ':''}${p.name||p.data?.target||''}<br/>占比: ${p.value.toFixed(4)}%<br/>约组合数: ${n.toLocaleString()}`;
+    }
+    return p.name;
+  }},
+  series:[{type:'sankey',data:nodes,links:links,emphasis:{focus:'adjacency'},lineStyle:{color:'source',curveness:0.5},label:{color:'#dce6ff'}}]
+});
+window.addEventListener('resize',()=>flow.resize());
+
+// dim dictionary
+const dimTable = document.getElementById('dimTable');
+dimTable.innerHTML = '<tr><th>维度</th><th>含义</th><th>分数/分档</th><th>题目映射</th></tr>' + dimDefs.map(d=>
+  `<tr><td><b>${d.id}</b><div class='small'>${d.name}</div></td><td>${d.desc}</td><td>范围 2~6；L=2-3 / M=4 / H=5-6</td><td>${d.q}</td></tr>`
+).join('');
+
+const uSel = document.getElementById('uType');
+const tSel = document.getElementById('tType');
+for (const p of patternData) {
+  const txt = `${p.code}（${p.cn||'未命名'}）`;
+  uSel.add(new Option('模拟用户：'+txt, p.code));
+  tSel.add(new Option('对比模板：'+txt, p.code));
+}
+uSel.value = (patternData.find(x=>x.code==='OJBK')? 'OJBK' : patternData[0]?.code);
+tSel.value = (patternData.find(x=>x.code==='CTRL')? 'CTRL' : patternData[1]?.code || patternData[0]?.code);
+
+const radar = echarts.init(document.getElementById('radar'));
+const diff = echarts.init(document.getElementById('diff'));
+const bchart = echarts.init(document.getElementById('bchart'));
+
+function simFromDistance(d) { return Math.max(0, Math.round((1 - d/30) * 100)); }
+function nearest(vec){
+  const arr = patternData.map(p=>({code:p.code,cn:p.cn,dist:p.vec.reduce((s,v,i)=>s+Math.abs(v-vec[i]),0), vec:p.vec})).sort((a,b)=>a.dist-b.dist);
+  return arr;
+}
+
+let simOffsets = Array(15).fill(0);
+
+function updateAll() {
+  const u = patternData.find(x=>x.code===uSel.value);
+  const t = patternData.find(x=>x.code===tSel.value);
+  if(!u||!t) return;
+
+  const d = u.vec.map((v,i)=>Math.abs(v-t.vec[i]));
+  const distance = d.reduce((a,b)=>a+b,0);
+  const exact = d.filter(x=>x===0).length;
+  const similarity = simFromDistance(distance);
+  document.getElementById('calc').textContent = `distance=${distance} · exact=${exact}/15 · similarity=${similarity}%`;
+
+  const topGap = d.map((x,i)=>({dim:dimOrder[i],v:x})).sort((a,b)=>b.v-a.v).slice(0,3).filter(x=>x.v>0);
+  document.getElementById('verdict').textContent = topGap.length
+    ? `判定解释：当前对比差异主要由 ${topGap.map(x=>x.dim).join(' / ')} 拉开。`
+    : '判定解释：两者完全一致（distance=0）。';
+
+  radar.setOption({
+    title:{text:'15维向量对比',left:'center',textStyle:{color:'#dce6ff',fontSize:14}},
+    tooltip:{},
+    legend:{top:28,textStyle:{color:'#b9c7e6'},data:[`${u.code}`,`${t.code}`]},
+    radar:{center:['50%','58%'], radius:120, indicator: dimOrder.map(x=>({name:x,max:3})), axisName:{color:'#a7b5d6'}, splitLine:{lineStyle:{color:'rgba(255,255,255,.14)'}}, splitArea:{areaStyle:{color:['rgba(255,255,255,.02)','rgba(255,255,255,.01)']}}, axisLine:{lineStyle:{color:'rgba(255,255,255,.2)'}}},
+    series:[{type:'radar',data:[{value:u.vec,name:u.code,areaStyle:{color:'rgba(127,155,255,.25)'},lineStyle:{color:'#7f9bff'}},{value:t.vec,name:t.code,areaStyle:{color:'rgba(57,214,170,.22)'},lineStyle:{color:'#39d6aa'}}]}]
+  });
+
+  diff.setOption({
+    title:{text:'逐维差值 |u_i - t_i|',left:'center',textStyle:{color:'#dce6ff',fontSize:14}},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    grid:{left:40,right:12,top:46,bottom:90},
+    xAxis:{type:'category',data:dimOrder,axisLabel:{color:'#a7b5d6'},axisLine:{lineStyle:{color:'rgba(255,255,255,.2)'}}},
+    yAxis:{type:'value',min:0,max:2,axisLabel:{color:'#a7b5d6'},splitLine:{lineStyle:{color:'rgba(255,255,255,.12)'}}},
+    visualMap:{show:false,min:0,max:2,inRange:{color:['#39d6aa','#f4a259','#ff6b6b']}},
+    series:[{type:'bar',data:d,itemStyle:{borderRadius:[5,5,0,0]}}]
+  });
+
+  // P1 boundary top1 vs top2
+  const rank = nearest(u.vec);
+  const top1 = rank[0], top2 = rank[1];
+  const bdiff = top1.vec.map((v,i)=>Math.abs(v-top2.vec[i]));
+  const decisive = bdiff.map((v,i)=>({dim:dimOrder[i],v})).sort((a,b)=>b.v-a.v).slice(0,5);
+  document.getElementById('boundary').textContent = `Top1：${top1.code}（distance=${top1.dist}） vs Top2：${top2.code}（distance=${top2.dist}）。边界维度：${decisive.filter(x=>x.v>0).map(x=>x.dim).join(' / ') || '差异很小'}。`;
+  bchart.setOption({
+    title:{text:'Top1 与 Top2 的模板差异维度',left:'center',textStyle:{color:'#dce6ff',fontSize:14}},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    grid:{left:40,right:12,top:46,bottom:70},
+    xAxis:{type:'category',data:dimOrder,axisLabel:{color:'#a7b5d6'}},
+    yAxis:{type:'value',min:0,max:2,axisLabel:{color:'#a7b5d6'},splitLine:{lineStyle:{color:'rgba(255,255,255,.12)'}}},
+    series:[{type:'bar',data:bdiff,itemStyle:{color:'#9ab3ff',borderRadius:[4,4,0,0]}}]
+  });
+
+  // P2 sensitivity
+  const simGrid = document.getElementById('simGrid');
+  simGrid.innerHTML = dimOrder.map((dname,idx)=>`
+    <div class='sim-item'>
+      <b>${dname}</b>
+      <div>偏移: ${simOffsets[idx]}</div>
+      <button class='btn' onclick='adj(${idx},-1)'>-</button>
+      <button class='btn' onclick='adj(${idx},1)'>+</button>
+    </div>`).join('');
+  const vec2 = u.vec.map((v,i)=>Math.max(1,Math.min(3,v+simOffsets[i])));
+  const after = nearest(vec2);
+  const beforeTop = rank[0];
+  const afterTop = after[0];
+  const changed = beforeTop.code !== afterTop.code;
+  document.getElementById('simResult').textContent = changed
+    ? `模拟结果：命中从 ${beforeTop.code} 变为 ${afterTop.code}（distance ${beforeTop.dist} -> ${afterTop.dist}）。`
+    : `模拟结果：仍命中 ${afterTop.code}（distance=${afterTop.dist}，similarity≈${simFromDistance(afterTop.dist)}%）。`;
+  document.getElementById('judge').textContent = `当前最近人格：${beforeTop.code}（相似度≈${simFromDistance(beforeTop.dist)}%）`;
+}
+
+window.adj = function(i,delta){
+  simOffsets[i] = Math.max(-1, Math.min(1, simOffsets[i] + delta));
+  updateAll();
+}
+
+uSel.addEventListener('change',()=>{ simOffsets=Array(15).fill(0); updateAll(); });
+tSel.addEventListener('change',updateAll);
+updateAll();
+window.addEventListener('resize',()=>{radar.resize(); diff.resize(); bchart.resize();});
+
+// cards
+const cardsEl=document.getElementById('cards');
+function avatarHtml(x){
+  return x.image
+    ? `<img src="${x.image}" alt="${x.code}"/>`
+    : `<div class="fallback">◉</div>`;
+}
+function renderCards(){
+ const q=(document.getElementById('q').value||'').trim().toLowerCase();
+ const sort=document.getElementById('sort').value;
+ let arr=[...cardsData].filter(x=>`${x.code} ${x.cn}`.toLowerCase().includes(q));
+ arr.sort((a,b)=>sort==='desc'?b.share-a.share:a.share-b.share);
+ cardsEl.innerHTML=arr.map(x=>`<div class="card"><div class="avatar">${avatarHtml(x)}</div><div class="body2"><div class="t">${x.code}（${x.cn||'未命名'}）</div><div class="s">理论占比：${x.share.toFixed(4)}%</div></div></div>`).join('');
+}
+document.getElementById('q').addEventListener('input',renderCards);
+document.getElementById('sort').addEventListener('change',renderCards);
+renderCards();
+}
+__start();
+</script>
+</body></html>

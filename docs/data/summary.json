@@ -1,0 +1,104 @@
+{
+  "url": "https://sbti.unun.dev/",
+  "normal_type_count": 25,
+  "branch_info": {
+    "drink_gate_q1_options": 4,
+    "drink_gate_q1_values": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "drink_gate_q2_options": 2,
+    "drink_gate_q2_values": [
+      1,
+      2
+    ]
+  },
+  "total_answer_combinations": 1029455660473245,
+  "top10_full": [
+    {
+      "type": "DRUNK",
+      "percentage": 20.0
+    },
+    {
+      "type": "OJBK",
+      "percentage": 7.9221
+    },
+    {
+      "type": "THAN-K",
+      "percentage": 6.3514
+    },
+    {
+      "type": "FAKE",
+      "percentage": 5.3738
+    },
+    {
+      "type": "SEXY",
+      "percentage": 4.7414
+    },
+    {
+      "type": "MALO",
+      "percentage": 4.6733
+    },
+    {
+      "type": "Dior-s",
+      "percentage": 4.1945
+    },
+    {
+      "type": "MUM",
+      "percentage": 4.1795
+    },
+    {
+      "type": "ZZZZ",
+      "percentage": 3.7469
+    },
+    {
+      "type": "LOVE-R",
+      "percentage": 3.3735
+    }
+  ],
+  "top10_non_drunk": [
+    {
+      "type": "OJBK",
+      "percentage": 9.9026
+    },
+    {
+      "type": "THAN-K",
+      "percentage": 7.9393
+    },
+    {
+      "type": "FAKE",
+      "percentage": 6.7173
+    },
+    {
+      "type": "SEXY",
+      "percentage": 5.9267
+    },
+    {
+      "type": "MALO",
+      "percentage": 5.8417
+    },
+    {
+      "type": "Dior-s",
+      "percentage": 5.2431
+    },
+    {
+      "type": "MUM",
+      "percentage": 5.2244
+    },
+    {
+      "type": "ZZZZ",
+      "percentage": 4.6836
+    },
+    {
+      "type": "LOVE-R",
+      "percentage": 4.2169
+    },
+    {
+      "type": "IMSB",
+      "percentage": 4.1999
+    }
+  ],
+  "image_count": 27
+}
