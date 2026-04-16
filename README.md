@@ -1,5 +1,10 @@
 # SBTI Reverse Research
 
+## 在线查看
+
+**GitHub Pages：**
+[https://yangyuwen-bri.github.io/sbti-reverse-research/](https://yangyuwen-bri.github.io/sbti-reverse-research/)
+
 > 一个基于公开页面信息的独立研究项目，聚焦两个问题：
 > `SBTI` 的人格结果是如何被算法算出来的，以及不同人格在理论作答空间里各占多少。
 >
